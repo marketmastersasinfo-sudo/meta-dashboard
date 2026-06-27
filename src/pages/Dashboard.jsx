@@ -1,12 +1,16 @@
 import React, { useEffect, useState } from 'react';
-import { Network, Server, User, Globe, Loader2, Maximize2 } from 'lucide-react';
+import { Network, Server, Maximize2, UserCircle, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BMDetailsModal from '../components/BMDetailsModal';
 
 const Dashboard = () => {
-  const [bms, setBms] = useState({ backup: [], rooms: [] });
+  const [allBMs, setAllBMs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBM, setSelectedBM] = useState(null);
+  
+  // Perfiles de Facebook
+  const [profiles, setProfiles] = useState([]);
+  const [selectedProfile, setSelectedProfile] = useState('');
 
   useEffect(() => {
     fetchBMs();
@@ -42,13 +46,16 @@ const Dashboard = () => {
         whatsapps: whatsapps.filter(wa => wa.bm_id === bm.id)
       }));
 
-      // Sort by status to show WARNING/BANNED first? Or keep them alphabetical
       enrichedBMs.sort((a, b) => a.name.localeCompare(b.name));
+      setAllBMs(enrichedBMs);
 
-      const backup = enrichedBMs.filter(bm => bm.type === 'BACKUP');
-      const rooms = enrichedBMs.filter(bm => bm.type === 'ROOM');
+      // Extract unique profiles
+      const uniqueProfiles = [...new Set(enrichedBMs.map(bm => bm.facebook_profile || bm.proxy_country || 'Paula Rojas'))];
+      setProfiles(uniqueProfiles);
+      if (uniqueProfiles.length > 0) {
+        setSelectedProfile(uniqueProfiles[0]);
+      }
 
-      setBms({ backup, rooms });
     } catch (error) {
       console.error('Error fetching BMs:', error);
     } finally {
@@ -74,63 +81,90 @@ const Dashboard = () => {
     );
   }
 
+  // Filtrar BMs por el perfil seleccionado
+  const filteredBMs = allBMs.filter(bm => (bm.facebook_profile || bm.proxy_country || 'Paula Rojas') === selectedProfile);
+  const backup = filteredBMs.filter(bm => bm.type === 'BACKUP');
+  const rooms = filteredBMs.filter(bm => bm.type === 'ROOM');
+
   return (
     <div className="fade-in">
-      <h1 className="page-title">Mapa de Estructura Publicitaria</h1>
-      <p className="page-subtitle">Visualización global de tu red de contingencia (Haz clic en cualquier BM para ver sus activos)</p>
+      
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+        <div>
+          <h1 className="page-title">Estructura Publicitaria</h1>
+          <p className="page-subtitle">Visualización interactiva (Haz clic en un BM para ver su inventario)</p>
+        </div>
+        
+        {/* Selector de Perfil */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', background: 'var(--glass-bg)', padding: '12px 16px', borderRadius: '12px', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-sm)' }}>
+          <UserCircle size={20} className="text-accent-primary" />
+          <span style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-secondary)' }}>Perfil Visualizado:</span>
+          <select 
+            className="profile-select"
+            value={selectedProfile} 
+            onChange={(e) => setSelectedProfile(e.target.value)}
+          >
+            {profiles.map(prof => (
+              <option key={prof} value={prof}>{prof}</option>
+            ))}
+          </select>
+        </div>
+      </div>
 
       {/* Backups / Bóvedas */}
-      <div style={{ marginBottom: '40px' }}>
-        <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+      <div style={{ marginBottom: '48px' }}>
+        <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
           <Network className="text-accent-primary" />
-          Las Bóvedas (Backups)
+          Bóvedas (Backups Oficiales)
         </h2>
         <div className="grid-bms">
-          {bms.backup.map((bm, idx) => (
+          {backup.map((bm, idx) => (
             <div key={bm.id} className="glass-card bm-card" onClick={() => openBMDetails(bm)} style={{ borderTop: `4px solid ${getStatusColor(bm.status)}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span className="badge badge-success" style={{ marginBottom: '12px' }}>BÓVEDA</span>
+                <span className="badge badge-success" style={{ marginBottom: '16px' }}>BÓVEDA PRINCIPAL</span>
                 <Maximize2 size={16} color="var(--text-muted)" />
               </div>
-              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Cuentas: {bm.adAccounts?.length || 0}</span>
                 <span>Páginas: {bm.pages?.length || 0}</span>
               </p>
             </div>
           ))}
+          {backup.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No hay Bóvedas asignadas a este perfil.</p>}
         </div>
       </div>
 
       {/* Rooms / Anunciantes */}
       <div>
-        <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+        <h2 style={{ marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
           <Server className="text-accent-primary" />
           Rooms (BMs Anunciantes)
         </h2>
         <div className="grid-bms">
-          {bms.rooms.map((bm, idx) => (
+          {rooms.map((bm, idx) => (
             <div key={bm.id} className="glass-card bm-card" onClick={() => openBMDetails(bm)} style={{ borderTop: `4px solid ${getStatusColor(bm.status)}` }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <span className={`badge badge-${bm.status === 'ACTIVE' ? 'success' : bm.status === 'WARNING' ? 'warning' : 'danger'}`} style={{ marginBottom: '12px' }}>
+                <span className={`badge badge-${bm.status === 'ACTIVE' ? 'success' : bm.status === 'WARNING' ? 'warning' : 'danger'}`} style={{ marginBottom: '16px' }}>
                   {bm.status}
                 </span>
                 <Maximize2 size={16} color="var(--text-muted)" />
               </div>
-              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
+              <h3 style={{ fontSize: '18px', fontWeight: '600', color: 'var(--text-primary)', marginBottom: '12px' }}>{bm.name}</h3>
               
-              <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+              <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '8px', borderBottom: '1px solid var(--border-color)', marginBottom: '8px' }}>
                   <span>Cuentas Publicitarias:</span>
-                  <span style={{ fontWeight: '600' }}>{bm.adAccounts?.length || 0}</span>
+                  <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{bm.adAccounts?.length || 0}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span>Activos Conectados:</span>
-                  <span style={{ fontWeight: '600' }}>{(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0)}</span>
+                  <span>Activos Adicionales:</span>
+                  <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0)}</span>
                 </div>
               </div>
             </div>
           ))}
+          {rooms.length === 0 && <p style={{ color: 'var(--text-muted)' }}>No hay Rooms asignados a este perfil.</p>}
         </div>
       </div>
 
