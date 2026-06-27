@@ -26,8 +26,12 @@ const Dashboard = () => {
 
       // 2. Fetch all related assets safely (in case tables don't exist yet, we catch errors)
       const fetchSafe = async (table) => {
-        const { data, error } = await supabase.from(table).select('*').catch((e) => ({ data: [], error: e }));
-        return error ? [] : (data || []);
+        try {
+          const { data, error } = await supabase.from(table).select('*');
+          return error ? [] : (data || []);
+        } catch (e) {
+          return [];
+        }
       };
 
       const [adAccounts, pages, instagrams, pixels, whatsapps] = await Promise.all([
