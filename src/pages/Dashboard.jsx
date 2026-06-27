@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { Network, Server, User, Globe, AlertTriangle, Loader2 } from 'lucide-react';
+import { Network, Server, User, Globe, Loader2, Maximize2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import BMDetailsModal from '../components/BMDetailsModal';
 
 const Dashboard = () => {
-  const [bms, setBms] = useState({ backup: null, rooms: [] });
+  const [bms, setBms] = useState({ backup: [], rooms: [] });
   const [loading, setLoading] = useState(true);
+  const [selectedBM, setSelectedBM] = useState(null);
 
   useEffect(() => {
     fetchBMs();
@@ -12,14 +14,39 @@ const Dashboard = () => {
 
   const fetchBMs = async () => {
     try {
-      const { data, error } = await supabase
-        .from('business_managers')
-        .select('*');
-      
-      if (error) throw error;
+      // 1. Fetch BMs
+      const { data: bmData, error: bmError } = await supabase.from('business_managers').select('*');
+      if (bmError) throw bmError;
 
-      const backup = data.find(bm => bm.type === 'BACKUP');
-      const rooms = data.filter(bm => bm.type === 'ROOM');
+      // 2. Fetch all related assets safely (in case tables don't exist yet, we catch errors)
+      const fetchSafe = async (table) => {
+        const { data, error } = await supabase.from(table).select('*').catch(() => ({ data: [] }));
+        return error ? [] : (data || []);
+      };
+
+      const [adAccounts, pages, instagrams, pixels, whatsapps] = await Promise.all([
+        fetchSafe('ad_accounts'),
+        fetchSafe('pages'),
+        fetchSafe('instagram_accounts'),
+        fetchSafe('pixels'),
+        fetchSafe('whatsapp_lines')
+      ]);
+
+      // 3. Assemble the data
+      const enrichedBMs = bmData.map(bm => ({
+        ...bm,
+        adAccounts: adAccounts.filter(cp => cp.bm_id === bm.id),
+        pages: pages.filter(p => p.bm_id === bm.id),
+        instagrams: instagrams.filter(ig => ig.bm_id === bm.id),
+        pixels: pixels.filter(px => px.bm_id === bm.id),
+        whatsapps: whatsapps.filter(wa => wa.bm_id === bm.id)
+      }));
+
+      // Sort by status to show WARNING/BANNED first? Or keep them alphabetical
+      enrichedBMs.sort((a, b) => a.name.localeCompare(b.name));
+
+      const backup = enrichedBMs.filter(bm => bm.type === 'BACKUP');
+      const rooms = enrichedBMs.filter(bm => bm.type === 'ROOM');
 
       setBms({ backup, rooms });
     } catch (error) {
@@ -35,10 +62,8 @@ const Dashboard = () => {
     return 'var(--danger)';
   };
 
-  const getStatusBadge = (status, text) => {
-    if (status === 'ACTIVE') return <div className="badge badge-success" style={{ marginBottom: '8px' }}>{text}</div>;
-    if (status === 'WARNING') return <div className="badge badge-warning" style={{ marginBottom: '8px' }}>{text} (Alerta)</div>;
-    return <div className="badge badge-danger" style={{ marginBottom: '8px' }}>{text} (Bloqueado)</div>;
+  const openBMDetails = (bm) => {
+    setSelectedBM(bm);
   };
 
   if (loading) {
@@ -50,45 +75,67 @@ const Dashboard = () => {
   }
 
   return (
-    <div>
+    <div className="fade-in">
       <h1 className="page-title">Mapa de Estructura Publicitaria</h1>
-      <p className="page-subtitle">Visualización global de tu red de contingencia extraída de Supabase</p>
+      <p className="page-subtitle">Visualización global de tu red de contingencia (Haz clic en cualquier BM para ver sus activos)</p>
 
-      <div className="glass-card" style={{ marginBottom: '24px' }}>
-        <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      {/* Backups / Bóvedas */}
+      <div style={{ marginBottom: '40px' }}>
+        <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
           <Network className="text-accent-primary" />
-          Ecosistema "Marlin"
+          Las Bóvedas (Backups)
         </h2>
-        <div style={{ padding: '20px', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-          
-          {bms.backup && (
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '40px' }}>
-              <div className="glass-card" style={{ textAlign: 'center', border: '2px solid var(--success)', width: '250px' }}>
-                <div className="badge badge-success" style={{ marginBottom: '8px' }}>LA BÓVEDA</div>
-                <h3 style={{ fontSize: '18px', color: 'var(--text-primary)' }}>{bms.backup.name}</h3>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginTop: '4px' }}>Dominios, Píxeles, Fanpages</p>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: '8px', marginTop: '12px' }}>
-                  <span className="badge" style={{ background: 'var(--bg-tertiary)' }}><User size={12}/> Admin 1</span>
-                  <span className="badge" style={{ background: 'var(--bg-tertiary)' }}><User size={12}/> Admin 2</span>
+        <div className="grid-bms">
+          {bms.backup.map((bm, idx) => (
+            <div key={bm.id} className="glass-card bm-card" onClick={() => openBMDetails(bm)} style={{ borderTop: `4px solid ${getStatusColor(bm.status)}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span className="badge badge-success" style={{ marginBottom: '12px' }}>BÓVEDA</span>
+                <Maximize2 size={16} color="var(--text-muted)" />
+              </div>
+              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
+              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
+                <span>Cuentas: {bm.adAccounts?.length || 0}</span>
+                <span>Páginas: {bm.pages?.length || 0}</span>
+              </p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Rooms / Anunciantes */}
+      <div>
+        <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)' }}>
+          <Server className="text-accent-primary" />
+          Rooms (BMs Anunciantes)
+        </h2>
+        <div className="grid-bms">
+          {bms.rooms.map((bm, idx) => (
+            <div key={bm.id} className="glass-card bm-card" onClick={() => openBMDetails(bm)} style={{ borderTop: `4px solid ${getStatusColor(bm.status)}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <span className={`badge badge-${bm.status === 'ACTIVE' ? 'success' : bm.status === 'WARNING' ? 'warning' : 'danger'}`} style={{ marginBottom: '12px' }}>
+                  {bm.status}
+                </span>
+                <Maximize2 size={16} color="var(--text-muted)" />
+              </div>
+              <h3 style={{ fontSize: '18px', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
+              
+              <div style={{ marginTop: '12px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '4px' }}>
+                  <span>Cuentas Publicitarias:</span>
+                  <span style={{ fontWeight: '600' }}>{bm.adAccounts?.length || 0}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span>Activos Conectados:</span>
+                  <span style={{ fontWeight: '600' }}>{(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0)}</span>
                 </div>
               </div>
             </div>
-          )}
-          
-          <div style={{ display: 'flex', justifyContent: 'space-around', flexWrap: 'wrap', gap: '20px' }}>
-            {bms.rooms.map((room, idx) => (
-              <div key={room.id} className="glass-card" style={{ textAlign: 'center', border: `1px solid ${getStatusColor(room.status)}`, width: '220px' }}>
-                {getStatusBadge(room.status, `ROOM ${idx + 1}`)}
-                <h3 style={{ fontSize: '16px', color: 'var(--text-primary)' }}>{room.name}</h3>
-                <div style={{ marginTop: '12px', textAlign: 'left', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                  <div><Globe size={12}/> Proxy: {room.proxy_country}</div>
-                  <div><Server size={12}/> Conectado al Backup</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          ))}
         </div>
       </div>
+
+      {/* Modal / Drawer */}
+      <BMDetailsModal bm={selectedBM} onClose={() => setSelectedBM(null)} />
     </div>
   );
 };
