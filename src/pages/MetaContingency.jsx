@@ -1,89 +1,127 @@
-import React from 'react';
-import { ShieldCheck, MessageCircle, Share2, Instagram, CreditCard } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ShieldCheck, MessageCircle, Share2, CreditCard, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const MetaContingency = () => {
+  const [adAccounts, setAdAccounts] = useState([]);
+  const [cards, setCards] = useState([]);
+  const [whatsappLines, setWhatsappLines] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      const [adRes, cardRes, waRes] = await Promise.all([
+        supabase.from('ad_accounts').select('*'),
+        supabase.from('cards').select('*'),
+        supabase.from('whatsapp_lines').select('*')
+      ]);
+
+      if (adRes.error) throw adRes.error;
+      if (cardRes.error) throw cardRes.error;
+      if (waRes.error) throw waRes.error;
+
+      setAdAccounts(adRes.data);
+      setCards(cardRes.data);
+      setWhatsappLines(waRes.data);
+    } catch (error) {
+      console.error('Error fetching Meta data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    if (status === 'ACTIVE' || status === 'CONNECTED') return 'var(--success)';
+    if (status === 'WARNING') return 'var(--warning)';
+    return 'var(--danger)';
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
+        <Loader2 className="animate-spin text-accent-primary" size={48} />
+      </div>
+    );
+  }
+
   return (
     <div>
-      <h1 className="page-title">Contingencia Meta (Facebook & IG)</h1>
-      <p className="page-subtitle">Semáforos de salud de tus activos en Meta y WhatsApp Cloud API</p>
+      <h1 className="page-title">Contingencia Meta (Facebook/IG)</h1>
+      <p className="page-subtitle">Estado en tiempo real de tus perfiles y activos de Meta desde Supabase.</p>
 
-      <div className="dashboard-grid">
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+        
         {/* Cuentas Publicitarias */}
         <div className="glass-card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+          <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Share2 className="text-accent-primary" />
-            Cuentas Publicitarias (CP)
-          </h3>
+            Cuentas Publicitarias
+          </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>CP - Ecom Principal</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>ID: 10023485729</div>
+            {adAccounts.map(cp => (
+              <div key={cp.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)' }}>{cp.name}</h4>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>ID: {cp.meta_account_id}</span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: getStatusColor(cp.status), fontWeight: 'bold', fontSize: '14px' }}>
+                    {cp.status === 'ACTIVE' ? 'ACTIVA' : cp.status}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Gasto: ${cp.total_spend}</div>
+                </div>
               </div>
-              <div className="badge badge-success">Activa</div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>CP - Respaldo 1</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>ID: 9988273645</div>
-              </div>
-              <div className="badge badge-warning">Revisión</div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>CP - Testeo</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>ID: 5566443322</div>
-              </div>
-              <div className="badge badge-danger">Bloqueada</div>
-            </div>
-          </div>
-        </div>
-
-        {/* WhatsApp Cloud API */}
-        <div className="glass-card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <MessageCircle className="text-success" />
-            WhatsApp Cloud API
-          </h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>Línea Ventas 1</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>+57 300 123 4567</div>
-              </div>
-              <div className="badge badge-success">Conectado</div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>Línea Soporte</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>+57 311 987 6543</div>
-              </div>
-              <div className="badge badge-success">Conectado</div>
-            </div>
+            ))}
+            {adAccounts.length === 0 && <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No hay cuentas registradas.</p>}
           </div>
         </div>
 
         {/* Tarjetas Dropicard */}
         <div className="glass-card">
-          <h3 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-            <CreditCard className="text-warning" />
-            Tarjetas Dropicard
-          </h3>
+          <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <CreditCard className="text-accent-primary" />
+            Tarjetas de Pago (Dropicard)
+          </h2>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>Virtual 01 (CP Principal)</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>**** 4567 • Gasto: $150</div>
+            {cards.map(card => (
+              <div key={card.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)' }}>{card.name}</h4>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Termina en **{card.mask}</span>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: getStatusColor(card.status), fontWeight: 'bold', fontSize: '14px' }}>{card.status}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Consumo: ${card.spent}</div>
+                </div>
               </div>
-              <div className="badge badge-success">OK</div>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '8px' }}>
-              <div>
-                <div style={{ fontWeight: '500' }}>Virtual 02 (CP Testeo)</div>
-                <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>**** 8901 • Gasto: $0</div>
+            ))}
+            {cards.length === 0 && <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No hay tarjetas registradas.</p>}
+          </div>
+        </div>
+
+        {/* WhatsApp */}
+        <div className="glass-card">
+          <h2 style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <MessageCircle className="text-accent-primary" />
+            Líneas de WhatsApp
+          </h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            {whatsappLines.map(wa => (
+              <div key={wa.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px', background: 'var(--bg-primary)', borderRadius: '6px' }}>
+                <div>
+                  <h4 style={{ color: 'var(--text-primary)' }}>{wa.name}</h4>
+                  <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{wa.phone}</span>
+                </div>
+                <div style={{ color: getStatusColor(wa.status), fontWeight: 'bold', fontSize: '14px' }}>
+                  {wa.status === 'CONNECTED' ? 'CONECTADO' : wa.status}
+                </div>
               </div>
-              <div className="badge badge-danger">Descartar</div>
-            </div>
+            ))}
+            {whatsappLines.length === 0 && <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>No hay líneas registradas.</p>}
           </div>
         </div>
 
