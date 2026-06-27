@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Network, Server, Maximize2, UserCircle, Loader2 } from 'lucide-react';
+import { Network, Server, Maximize2, UserCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import BMDetailsModal from '../components/BMDetailsModal';
 
@@ -7,6 +7,7 @@ const Dashboard = () => {
   const [allBMs, setAllBMs] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedBM, setSelectedBM] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
   
   // Perfiles de Facebook
   const [profiles, setProfiles] = useState([]);
@@ -18,13 +19,14 @@ const Dashboard = () => {
 
   const fetchBMs = async () => {
     try {
+      setFetchError(null);
       // 1. Fetch BMs
       const { data: bmData, error: bmError } = await supabase.from('business_managers').select('*');
       if (bmError) throw bmError;
 
       // 2. Fetch all related assets safely (in case tables don't exist yet, we catch errors)
       const fetchSafe = async (table) => {
-        const { data, error } = await supabase.from(table).select('*').catch(() => ({ data: [] }));
+        const { data, error } = await supabase.from(table).select('*').catch((e) => ({ data: [], error: e }));
         return error ? [] : (data || []);
       };
 
@@ -58,6 +60,7 @@ const Dashboard = () => {
 
     } catch (error) {
       console.error('Error fetching BMs:', error);
+      setFetchError(error.message || JSON.stringify(error));
     } finally {
       setLoading(false);
     }
@@ -77,6 +80,18 @@ const Dashboard = () => {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
         <Loader2 className="animate-spin text-accent-primary" size={48} />
+      </div>
+    );
+  }
+
+  if (fetchError) {
+    return (
+      <div style={{ padding: '24px', background: 'var(--danger)', color: 'white', borderRadius: '12px', margin: '24px' }}>
+        <h2 style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><AlertTriangle /> Error Crítico de Conexión</h2>
+        <p style={{ marginTop: '12px', fontFamily: 'monospace', background: 'rgba(0,0,0,0.2)', padding: '12px', borderRadius: '8px' }}>
+          {fetchError}
+        </p>
+        <p style={{ marginTop: '12px' }}>Por favor envíame una captura de esta pantalla roja para que pueda arreglarlo inmediatamente.</p>
       </div>
     );
   }
@@ -104,9 +119,9 @@ const Dashboard = () => {
             value={selectedProfile} 
             onChange={(e) => setSelectedProfile(e.target.value)}
           >
-            {profiles.map(prof => (
+            {profiles.length > 0 ? profiles.map(prof => (
               <option key={prof} value={prof}>{prof}</option>
-            ))}
+            )) : <option value="">Sin Perfiles</option>}
           </select>
         </div>
       </div>
@@ -127,7 +142,7 @@ const Dashboard = () => {
               <h3 style={{ fontSize: '18px', fontWeight: '700', color: 'var(--text-primary)', marginBottom: '8px' }}>{bm.name}</h3>
               <p style={{ color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', justifyContent: 'space-between' }}>
                 <span>Cuentas: {bm.adAccounts?.length || 0}</span>
-                <span>Páginas: {bm.pages?.length || 0}</span>
+                <span>Activos Adicionales: {(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0) + (bm.whatsapps?.length || 0)}</span>
               </p>
             </div>
           ))}
@@ -159,7 +174,7 @@ const Dashboard = () => {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span>Activos Adicionales:</span>
-                  <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0)}</span>
+                  <span style={{ fontWeight: '700', color: 'var(--text-primary)' }}>{(bm.pages?.length || 0) + (bm.instagrams?.length || 0) + (bm.pixels?.length || 0) + (bm.whatsapps?.length || 0)}</span>
                 </div>
               </div>
             </div>
