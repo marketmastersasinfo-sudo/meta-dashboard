@@ -32,6 +32,16 @@ const Sidebar = () => {
           <Activity size={20} />
           <span>Contingencia TikTok</span>
         </NavLink>
+        <div style={{ marginTop: 'auto', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+          <NavLink 
+            to="/admin" 
+            className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+            style={{ color: 'var(--warning)' }}
+          >
+            <Shield size={20} />
+            <span style={{ fontWeight: '600' }}>Panel de Control</span>
+          </NavLink>
+        </div>
       </nav>
     </div>
   );

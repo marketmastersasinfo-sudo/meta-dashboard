@@ -4,6 +4,7 @@ import Layout from './components/Layout';
 import Dashboard from './pages/Dashboard';
 import MetaContingency from './pages/MetaContingency';
 import TikTokContingency from './pages/TikTokContingency';
+import AdminPanel from './pages/AdminPanel';
 import './index.css';
 
 function App() {
@@ -14,6 +15,7 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="meta" element={<MetaContingency />} />
           <Route path="tiktok" element={<TikTokContingency />} />
+          <Route path="admin" element={<AdminPanel />} />
         </Route>
       </Routes>
     </BrowserRouter>
