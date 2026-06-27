@@ -1,6 +1,11 @@
 import React from 'react';
 import { X, Share2, CreditCard, Layers, Hash, MessageCircle } from 'lucide-react';
 
+const formatCurrency = (amount) => {
+  // Convierte el número a string y le pone puntos como separadores de miles
+  return '$' + amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+};
+
 const BMDetailsModal = ({ bm, onClose }) => {
   if (!bm) return null;
 
@@ -46,8 +51,13 @@ const BMDetailsModal = ({ bm, onClose }) => {
                   <div style={{ color: cp.status === 'ACTIVE' ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold', fontSize: '13px' }}>
                     {cp.status}
                   </div>
+                  {cp.ban_reason && cp.status !== 'ACTIVE' && (
+                    <div style={{ fontSize: '11px', color: 'var(--danger)', marginTop: '2px' }}>
+                      ({cp.ban_reason})
+                    </div>
+                  )}
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    Saldo: ${cp.current_balance || 0}
+                    Saldo: {formatCurrency(cp.current_balance || 0)}
                   </div>
                 </div>
               </div>
@@ -106,11 +116,21 @@ const BMDetailsModal = ({ bm, onClose }) => {
             <MessageCircle size={18} className="text-accent-primary" />
             Líneas de WhatsApp
           </h3>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             {bm.whatsapps && bm.whatsapps.length > 0 ? bm.whatsapps.map(wa => (
-              <span key={wa.id} className="badge" style={{ background: 'var(--bg-primary)', border: '1px solid var(--border-color)', color: 'var(--text-secondary)' }}>
-                {wa.name}
-              </span>
+              <div key={wa.id} style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 16px', background: 'var(--bg-primary)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                <div>
+                  <h4 style={{ fontWeight: '600', color: 'var(--text-primary)' }}>{wa.name}</h4>
+                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
+                    {wa.card_mask ? <span style={{display:'flex', alignItems:'center', gap:'4px'}}><CreditCard size={12}/> **{wa.card_mask}</span> : 'Sin Tarjeta'}
+                  </div>
+                </div>
+                <div style={{ textAlign: 'right' }}>
+                  <div style={{ color: wa.status === 'ACTIVE' ? 'var(--success)' : 'var(--danger)', fontWeight: 'bold', fontSize: '13px' }}>
+                    {wa.status}
+                  </div>
+                </div>
+              </div>
             )) : <p style={{ color: 'var(--text-muted)', fontSize: '14px' }}>No hay líneas de WhatsApp registradas.</p>}
           </div>
         </div>
