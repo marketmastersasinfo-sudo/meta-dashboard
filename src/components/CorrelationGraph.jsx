@@ -224,10 +224,10 @@ const CorrelationGraph = () => {
     ctx.globalAlpha = 1;
 
     // Label below
-    const showLabel = globalScale > 0.6 || highlightNodes.has(node);
+    const showLabel = globalScale > 1.2 || highlightNodes.has(node);
     if (showLabel) {
       const label = truncate(node.name, 22);
-      const fs = Math.min(cfg.fontSize, 14 / globalScale);
+      const fs = Math.min(cfg.fontSize, 16 / globalScale);
       ctx.font = `bold ${fs}px 'Inter', 'Segoe UI', sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
@@ -297,6 +297,14 @@ const CorrelationGraph = () => {
 
     return { nodes: finalNodes, links: filteredLinks };
   }, [graphData, selectedProfile, showAds]);
+
+  // Aplicar fuerzas personalizadas para separar los nodos y evitar la "bola de pelo"
+  useEffect(() => {
+    if (fgRef.current && graphData) {
+      fgRef.current.d3Force('charge').strength(-400); // Separa los nodos con mucha más fuerza (default es -30)
+      fgRef.current.d3Force('link').distance(60); // Alarga las líneas de conexión
+    }
+  }, [graphData]);
 
   if (loading) {
     return (
