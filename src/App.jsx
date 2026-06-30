@@ -6,6 +6,7 @@ import MetaContingency from './pages/MetaContingency';
 import CorrelationMap from './pages/CorrelationMap';
 import TikTokContingency from './pages/TikTokContingency';
 import AdminPanel from './pages/AdminPanel';
+import ActionPlan from './pages/ActionPlan';
 import './index.css';
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
           <Route path="meta" element={<MetaContingency />} />
           <Route path="correlaciones" element={<CorrelationMap />} />
           <Route path="tiktok" element={<TikTokContingency />} />
+          <Route path="action-plan" element={<ActionPlan />} />
           <Route path="admin" element={<AdminPanel />} />
         </Route>
       </Routes>

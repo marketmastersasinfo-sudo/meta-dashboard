@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, NavLink } from 'react-router-dom';
-import { Shield, LayoutDashboard, ShieldCheck, Activity, Network } from 'lucide-react';
+import { Shield, LayoutDashboard, ShieldCheck, Activity, Network, ListTodo } from 'lucide-react';
 
 const Sidebar = () => {
   return (
@@ -31,6 +31,14 @@ const Sidebar = () => {
         >
           <Network size={20} />
           <span>Mapa de Correlaciones</span>
+        </NavLink>
+        <NavLink 
+          to="/action-plan" 
+          className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
+          style={{ borderLeft: '3px solid #a855f7', background: 'rgba(168,85,247,0.05)' }}
+        >
+          <ListTodo size={20} color="#a855f7" />
+          <span style={{ color: '#a855f7', fontWeight: 'bold' }}>Checklist Ejecución</span>
         </NavLink>
         <NavLink 
           to="/tiktok" 
