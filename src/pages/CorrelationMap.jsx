@@ -3,15 +3,14 @@ import CorrelationGraph from '../components/CorrelationGraph';
 
 const CorrelationMap = () => {
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '16px' }}>
-        <h1 className="page-title">Mapa Mental de Correlaciones</h1>
-        <p className="page-subtitle">Explora los "Hilos de la Muerte". Arrastra los nodos para ver cómo los BMs comparten activos críticos (WhatsApps y Píxeles).</p>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+      <div style={{ marginBottom: '12px' }}>
+        <h1 className="page-title" style={{ marginBottom: '4px' }}>🧠 Mapa Mental de Correlaciones</h1>
+        <p className="page-subtitle" style={{ margin: 0 }}>
+          Explora los "Hilos de la Muerte". Haz hover sobre los nodos para ver detalles. Haz clic para hacer zoom. Filtra por perfil o muestra/oculta cuentas publicitarias.
+        </p>
       </div>
-
-      <div style={{ flex: 1, minHeight: '600px', position: 'relative' }}>
-        <CorrelationGraph />
-      </div>
+      <CorrelationGraph />
     </div>
   );
 };
