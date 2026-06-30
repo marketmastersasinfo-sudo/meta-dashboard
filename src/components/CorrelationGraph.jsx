@@ -16,6 +16,7 @@ const ZONE_COLORS = {
   bmClean: '#3b82f6',
   bmToxic: '#ef4444',
   bmGreen: '#10b981',
+  bmYellow: '#eab308',
   whatsapp: '#25d366',
   pixel: '#f59e0b',
   adActive: '#10b981',
@@ -118,9 +119,17 @@ const CorrelationGraph = () => {
 
       let bmColor = ZONE_COLORS.bmClean;
       let zone = 'Reserva';
-      if (debt > 1000000 || (banned > active && bmAds.length > 0)) { bmColor = ZONE_COLORS.bmToxic; zone = 'Tóxico'; }
-      else if (active > 0 && debt === 0 && banned === 0) { bmColor = ZONE_COLORS.bmGreen; zone = 'Limpio'; }
-      else if (banned > 0) { bmColor = ZONE_COLORS.bmToxic; zone = 'Tóxico'; }
+      
+      if (debt > 1000000 || (banned > active && bmAds.length > 0)) { 
+        bmColor = ZONE_COLORS.bmToxic; 
+        zone = 'Tóxico'; 
+      } else if (debt > 500000 || banned > 0) { 
+        bmColor = ZONE_COLORS.bmYellow; 
+        zone = 'Precaución'; 
+      } else if (active > 0) { 
+        bmColor = ZONE_COLORS.bmGreen; 
+        zone = 'Limpio'; 
+      }
 
       const bmId = `bm::${bm.id}`;
       nodes.push({ id: bmId, name: bm.name, group: 'BM', color: bmColor, zone, debt, banned, active, adsCount: bmAds.length, profile: bm.facebook_profile });
@@ -387,6 +396,7 @@ const CorrelationGraph = () => {
           </div>
           <LegendItem emoji="👤" color="#a855f7" label="Perfil Facebook" />
           <LegendItem emoji="🏢" color="#10b981" label="BM Limpio" />
+          <LegendItem emoji="🏢" color="#eab308" label="BM Precaución" />
           <LegendItem emoji="🏢" color="#ef4444" label="BM Tóxico" />
           <LegendItem emoji="🏢" color="#3b82f6" label="BM Reserva" />
           <LegendItem emoji="💬" color="#25d366" label="WhatsApp" />

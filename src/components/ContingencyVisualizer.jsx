@@ -47,9 +47,9 @@ const ContingencyVisualizer = () => {
     if (debt > 1000000) return 'RED';
     if (bannedAds.length > activeAds.length && bmAds.length > 0) return 'RED';
     
-    if (debt > 100000 || bannedAds.length > 0) return 'YELLOW';
+    if (debt > 500000 || bannedAds.length > 0) return 'YELLOW';
     
-    if (activeAds.length > 0 && debt === 0) return 'GREEN';
+    if (activeAds.length > 0) return 'GREEN';
     if (bmAds.length === 0) return 'BLUE';
     
     return 'BLUE';
