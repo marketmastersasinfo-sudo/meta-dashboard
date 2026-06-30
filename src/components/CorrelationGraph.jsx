@@ -37,7 +37,7 @@ const CorrelationGraph = () => {
 
   // Responsive sizing
   useEffect(() => {
-    if (!graphWrapperRef.current) return;
+    if (loading || !graphWrapperRef.current) return;
     
     const updateSize = () => {
       if (graphWrapperRef.current) {
@@ -49,21 +49,20 @@ const CorrelationGraph = () => {
     };
 
     const resizeObserver = new ResizeObserver(() => {
-      // Usamos requestAnimationFrame para evitar el error "ResizeObserver loop limit exceeded"
       window.requestAnimationFrame(() => updateSize());
     });
 
     resizeObserver.observe(graphWrapperRef.current);
     window.addEventListener('resize', updateSize);
     
-    // Llamada inicial con un pequeño retraso para asegurar que el DOM (y flexbox) se ha pintado
-    setTimeout(updateSize, 100);
+    // Llamada inicial
+    updateSize();
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener('resize', updateSize);
     };
-  }, []);
+  }, [loading]);
 
   useEffect(() => { fetchData(); }, []);
 
