@@ -15,7 +15,7 @@ const ZONE_COLORS = {
   profile: '#a855f7',
   bmClean: '#3b82f6',
   bmToxic: '#ef4444',
-  bmGreen: '#10b981',
+  bmGreen: '#06b6d4', // Cyan para BM Limpio
   bmYellow: '#eab308',
   whatsapp: '#25d366',
   pixel: '#f59e0b',
@@ -395,7 +395,7 @@ const CorrelationGraph = () => {
             🧠 Leyenda
           </div>
           <LegendItem emoji="👤" color="#a855f7" label="Perfil Facebook" />
-          <LegendItem emoji="🏢" color="#10b981" label="BM Limpio" />
+          <LegendItem emoji="🏢" color="#06b6d4" label="BM Limpio" />
           <LegendItem emoji="🏢" color="#eab308" label="BM Precaución" />
           <LegendItem emoji="🏢" color="#ef4444" label="BM Tóxico" />
           <LegendItem emoji="🏢" color="#3b82f6" label="BM Reserva" />

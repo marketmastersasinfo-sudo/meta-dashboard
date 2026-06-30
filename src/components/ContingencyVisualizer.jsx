@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldAlert, ShieldCheck, Shield, AlertTriangle, AlertCircle, Smartphone, CreditCard, Box, Share2, Eye, Loader2 } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Shield, AlertTriangle, AlertCircle, Smartphone, CreditCard, Box, Share2, Eye, Loader2, Map } from 'lucide-react';
+import IdealArchitecture from './IdealArchitecture';
 
 const ContingencyVisualizer = () => {
   const [data, setData] = useState({ bms: [], ads: [], pages: [], was: [], pxs: [] });
@@ -114,9 +115,20 @@ const ContingencyVisualizer = () => {
           <Smartphone size={14} style={{ display: 'inline', marginRight: '4px' }} />
           Rastrear WhatsApps
         </button>
+        <button 
+          onClick={() => setFilter('IDEAL')}
+          style={{ background: filter === 'IDEAL' ? '#a855f7' : 'var(--bg-primary)', color: filter === 'IDEAL' ? '#fff' : 'var(--text-primary)', border: '1px solid #a855f7', padding: '6px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
+        >
+          <Map size={14} style={{ display: 'inline', marginRight: '4px' }} />
+          🗺️ Arquitectura Ideal
+        </button>
       </div>
 
-      {profiles.map(profile => {
+      {filter === 'IDEAL' ? (
+        <IdealArchitecture bms={data.bms} ads={data.ads} pxs={data.pxs} was={data.was} />
+      ) : (
+        <>
+          {profiles.map(profile => {
         const profileBMs = data.bms.filter(b => b.facebook_profile === profile);
         if (profileBMs.length === 0) return null;
 
@@ -209,6 +221,8 @@ const ContingencyVisualizer = () => {
           </div>
         );
       })}
+      </>
+      )}
     </div>
   );
 };
