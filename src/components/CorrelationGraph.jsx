@@ -37,18 +37,23 @@ const CorrelationGraph = () => {
 
   // Responsive sizing
   useEffect(() => {
-    const updateSize = () => {
-      if (containerRef.current) {
-        const rect = containerRef.current.getBoundingClientRect();
-        setDimensions({
-          width: rect.width,
-          height: Math.max(window.innerHeight - 200, 650)
-        });
+    if (!containerRef.current) return;
+    
+    const resizeObserver = new ResizeObserver(entries => {
+      for (let entry of entries) {
+        const { width } = entry.contentRect;
+        if (width > 0) {
+          setDimensions({
+            width: width,
+            height: Math.max(window.innerHeight - 200, 650)
+          });
+        }
       }
-    };
-    updateSize();
-    window.addEventListener('resize', updateSize);
-    return () => window.removeEventListener('resize', updateSize);
+    });
+
+    resizeObserver.observe(containerRef.current);
+
+    return () => resizeObserver.disconnect();
   }, []);
 
   useEffect(() => { fetchData(); }, []);
