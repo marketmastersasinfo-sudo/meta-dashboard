@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { ShieldCheck, ShieldAlert, Package, Skull, Smartphone, Box, Shield, Plus, Share2, Server, Network, ChevronDown, ChevronRight, Globe, Image, CreditCard, AlertTriangle } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { ShieldCheck, ShieldAlert, Package, Skull, Smartphone, Box, Shield, Share2, Network, Globe, User, Briefcase, Megaphone, Code, ChevronRight, ArrowDown } from 'lucide-react';
 
 /* ──────────────────────────────────────────────
    Helper: classify a BM into a zone
@@ -10,7 +10,6 @@ const classifyBM = (bm, ads) => {
   const activeAds = bmAds.filter(a => a.status === 'ACTIVE');
   const hasDebt = debt > 500000;
   const allDead = bmAds.length > 0 && bmAds.every(a => a.status !== 'ACTIVE');
-
   if (hasDebt && allDead) return 'CEMENTERIO';
   if (hasDebt) return 'RIESGO';
   if (activeAds.length > 0) return 'GUERRERO';
@@ -18,73 +17,45 @@ const classifyBM = (bm, ads) => {
 };
 
 /* ──────────────────────────────────────────────
-   Sub-component: a single BM card with all its assets
+   Visual Node Component  
    ────────────────────────────────────────────── */
-const BMCard = ({ bm, ads, was, pxs, pages, zoneColor, zoneIcon, zoneLabel }) => {
-  const [expanded, setExpanded] = useState(false);
-  const bmAds = ads.filter(a => a.bm_id === bm.id);
-  const bmWAs = was.filter(w => w.bm_id === bm.id);
-  const bmPxs = pxs.filter(p => p.bm_id === bm.id);
-  const bmPages = pages.filter(p => p.bm_id === bm.id);
-  const debt = bmAds.reduce((s, a) => s + (a.current_balance || 0), 0);
-  const totalAssets = bmWAs.length + bmPxs.length + bmPages.length;
-
+const DiagramNode = ({ icon: Icon, label, sublabel, color, bg, size = 'md', badge, onClick, glow }) => {
+  const sizes = {
+    lg: { w: 180, h: 70, iconSize: 28, fontSize: '15px', subSize: '11px', radius: '14px', pad: '14px 18px' },
+    md: { w: 150, h: 56, iconSize: 20, fontSize: '13px', subSize: '10px', radius: '10px', pad: '10px 14px' },
+    sm: { w: 130, h: 46, iconSize: 16, fontSize: '11px', subSize: '9px', radius: '8px', pad: '8px 10px' },
+  };
+  const s = sizes[size];
   return (
-    <div style={{
-      background: 'var(--bg-primary)',
-      border: `1px solid ${zoneColor}30`,
-      borderLeft: `3px solid ${zoneColor}`,
-      borderRadius: '8px',
-      marginBottom: '8px',
-      fontSize: '14px',
-      overflow: 'hidden'
+    <div onClick={onClick} style={{
+      background: bg || `${color}15`,
+      border: `2px solid ${color}60`,
+      borderRadius: s.radius,
+      padding: s.pad,
+      display: 'flex',
+      alignItems: 'center',
+      gap: '10px',
+      cursor: onClick ? 'pointer' : 'default',
+      transition: 'all 0.3s',
+      position: 'relative',
+      boxShadow: glow ? `0 0 20px ${color}40, 0 4px 12px rgba(0,0,0,0.1)` : '0 2px 8px rgba(0,0,0,0.05)',
+      minWidth: s.w + 'px',
+      maxWidth: '220px',
     }}>
-      <div
-        onClick={() => setExpanded(!expanded)}
-        style={{
-          display: 'flex', alignItems: 'center', gap: '8px',
-          padding: '8px 12px', cursor: 'pointer',
-          background: expanded ? `${zoneColor}08` : 'transparent'
-        }}
-      >
-        {expanded ? <ChevronDown size={14} color={zoneColor} /> : <ChevronRight size={14} color={zoneColor} />}
-        <span style={{ fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{bm.name}</span>
-        {debt > 0 && (
-          <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '13px' }}>
-            ${(debt / 1000000).toFixed(1)}M
-          </span>
-        )}
-        <span style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>
-          {totalAssets} activos
-        </span>
+      <div style={{ 
+        width: s.iconSize + 12 + 'px', height: s.iconSize + 12 + 'px', 
+        borderRadius: '50%', background: `${color}25`, 
+        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 
+      }}>
+        <Icon size={s.iconSize} color={color} />
       </div>
-
-      {expanded && (
-        <div style={{ padding: '4px 12px 10px 32px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
-          {bmAds.length > 0 && (
-            <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '4px' }}>
-              <CreditCard size={12} style={{ display: 'inline', marginRight: '4px' }} />
-              {bmAds.length} cuentas pub. | {bmAds.filter(a => a.status === 'ACTIVE').length} activas
-            </div>
-          )}
-          {bmWAs.map(w => (
-            <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#25d366', padding: '2px 0' }}>
-              <Smartphone size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{w.name || w.phone}</span>
-            </div>
-          ))}
-          {bmPxs.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', padding: '2px 0' }}>
-              <Box size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{p.name}</span>
-            </div>
-          ))}
-          {bmPages.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', padding: '2px 0' }}>
-              <Globe size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{p.name}</span>
-            </div>
-          ))}
-          {totalAssets === 0 && bmAds.length === 0 && (
-            <div style={{ color: 'var(--text-tertiary)', fontStyle: 'italic' }}>Sin activos registrados</div>
-          )}
+      <div style={{ overflow: 'hidden' }}>
+        <div style={{ fontSize: s.fontSize, fontWeight: 700, color: 'var(--text-primary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{label}</div>
+        {sublabel && <div style={{ fontSize: s.subSize, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sublabel}</div>}
+      </div>
+      {badge && (
+        <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: badge.color, color: '#fff', fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
+          {badge.text}
         </div>
       )}
     </div>
@@ -92,13 +63,53 @@ const BMCard = ({ bm, ads, was, pxs, pages, zoneColor, zoneIcon, zoneLabel }) =>
 };
 
 /* ──────────────────────────────────────────────
-   Sub-component: Profile Ecosystem Node
+   Arrow / Connector 
    ────────────────────────────────────────────── */
-const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMoreLogin }) => {
+const Arrow = ({ color = '#6b7280', label, dashed }) => (
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '4px 0' }}>
+    <div style={{ width: '2px', height: '20px', background: color, borderStyle: dashed ? 'dashed' : 'solid' }} />
+    {label && <div style={{ fontSize: '10px', color, fontWeight: 700, padding: '2px 8px', background: `${color}10`, borderRadius: '4px', whiteSpace: 'nowrap' }}>{label}</div>}
+    <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `8px solid ${color}` }} />
+  </div>
+);
+
+const HorizontalArrow = ({ color = '#6b7280', label, direction = 'right' }) => (
+  <div style={{ display: 'flex', alignItems: 'center', gap: '4px', padding: '0 4px' }}>
+    {direction === 'left' && <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderRight: `8px solid ${color}` }} />}
+    <div style={{ height: '2px', width: '30px', background: color }} />
+    {label && <div style={{ fontSize: '9px', color, fontWeight: 700, whiteSpace: 'nowrap' }}>{label}</div>}
+    <div style={{ height: '2px', width: '30px', background: color }} />
+    {direction === 'right' && <div style={{ width: 0, height: 0, borderTop: '5px solid transparent', borderBottom: '5px solid transparent', borderLeft: `8px solid ${color}` }} />}
+  </div>
+);
+
+/* ──────────────────────────────────────────────
+   Asset Cluster (group of small nodes)
+   ────────────────────────────────────────────── */
+const AssetCluster = ({ items, icon: Icon, color, label }) => (
+  <div style={{ 
+    background: `${color}08`, border: `1px solid ${color}25`, borderRadius: '10px', 
+    padding: '10px', minWidth: '140px', maxWidth: '200px' 
+  }}>
+    <div style={{ fontSize: '11px', fontWeight: 800, color, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+      <Icon size={14} /> {label} ({items.length})
+    </div>
+    {items.slice(0, 5).map((item, i) => (
+      <div key={i} style={{ fontSize: '11px', color: 'var(--text-primary)', padding: '2px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+        <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item}</span>
+      </div>
+    ))}
+    {items.length > 5 && <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>+{items.length - 5} más...</div>}
+  </div>
+);
+
+/* ──────────────────────────────────────────────
+   Profile Diagram (the main visual flowchart)
+   ────────────────────────────────────────────── */
+const ProfileDiagram = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMoreLogin }) => {
   const profileBMs = bms.filter(b => b.facebook_profile === profile);
 
-  // Classify BMs
-  const vaultCandidates = [];
   const warriors = [];
   const reserves = [];
   const cemetery = [];
@@ -106,257 +117,259 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
   profileBMs.forEach(bm => {
     const zone = classifyBM(bm, ads);
     if (zone === 'CEMENTERIO') cemetery.push(bm);
-    else if (zone === 'RIESGO') warriors.push(bm); // risky but active
-    else if (zone === 'GUERRERO') warriors.push(bm);
+    else if (zone === 'RIESGO' || zone === 'GUERRERO') warriors.push(bm);
     else reserves.push(bm);
   });
 
-  // Gather ALL WAs and Pixels across this profile's BMs
-  const allProfileWAs = was.filter(w => profileBMs.some(b => b.id === w.bm_id));
-  const allProfilePxs = pxs.filter(p => profileBMs.some(b => b.id === p.bm_id));
-  const allProfilePages = pages.filter(p => profileBMs.some(b => b.id === p.bm_id));
-
-  // Stats
-  const totalDebt = profileBMs.reduce((sum, bm) => {
-    return sum + ads.filter(a => a.bm_id === bm.id).reduce((s, a) => s + (a.current_balance || 0), 0);
-  }, 0);
+  const allWAs = was.filter(w => profileBMs.some(b => b.id === w.bm_id));
+  const allPxs = pxs.filter(p => profileBMs.some(b => b.id === p.bm_id));
+  const allPages = pages.filter(p => profileBMs.some(b => b.id === p.bm_id));
+  const totalDebt = profileBMs.reduce((sum, bm) => sum + ads.filter(a => a.bm_id === bm.id).reduce((s, a) => s + (a.current_balance || 0), 0), 0);
 
   return (
-    <div style={{
-      background: 'var(--bg-primary)',
-      borderRadius: '16px',
-      border: `2px solid ${color}40`,
-      overflow: 'hidden',
-      boxShadow: `0 8px 24px ${color}10`,
-      display: 'flex',
-      flexDirection: 'column'
-    }}>
-      {/* HEADER */}
-      <div style={{
-        background: `linear-gradient(135deg, ${color}20, ${color}05)`,
-        padding: '14px 18px',
-        borderBottom: `1px solid ${color}30`
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Server size={18} color={color} />
-          <h3 style={{ margin: 0, color: color, fontSize: '16px', fontWeight: 800, flex: 1 }}>{profile}</h3>
-          {isRented && <span style={{ background: '#f43f5e20', color: '#f43f5e', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>ALQUILADA</span>}
-          {isMoreLogin && <span style={{ background: '#3b82f620', color: '#3b82f6', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>MORELOGIN</span>}
-        </div>
-        <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-          <span>{profileBMs.length} BMs</span>
-          <span style={{ color: '#25d366' }}>{allProfileWAs.length} WAs</span>
-          <span style={{ color: '#f59e0b' }}>{allProfilePxs.length} Píxeles</span>
-          <span style={{ color: '#3b82f6' }}>{allProfilePages.length} Páginas</span>
-          {totalDebt > 0 && <span style={{ color: '#ef4444', fontWeight: 700 }}>Deuda: ${(totalDebt / 1000000).toFixed(1)}M</span>}
-        </div>
+    <div style={{ padding: '30px 20px', minHeight: '500px' }}>
+      
+      {/* ═══ LAYER 0: PROFILE ═══ */}
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0' }}>
+        <DiagramNode 
+          icon={User} label={profile} 
+          sublabel={`${profileBMs.length} BMs | ${isMoreLogin ? 'MoreLogin' : isRented ? 'Alquilada' : 'Navegador'}`}
+          color={color} size="lg" glow={true}
+          badge={totalDebt > 0 ? { text: `Deuda: $${(totalDebt/1000000).toFixed(1)}M`, color: '#ef4444' } : null}
+        />
       </div>
 
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '14px', flexGrow: 1 }}>
+      <Arrow color={color} label="Es dueño de" />
 
-        {/* BÓVEDA SECTION (only if not rented) */}
-        {!isRented && (
-          <div style={{
-            background: 'var(--bg-secondary)',
-            border: `2px dashed ${color}`,
-            borderRadius: '10px',
-            padding: '14px'
+      {/* ═══ LAYER 1: BÓVEDA (if not rented) ═══ */}
+      {!isRented ? (
+        <>
+          <div style={{ 
+            background: `${color}08`, border: `2px dashed ${color}50`, borderRadius: '16px', 
+            padding: '20px', margin: '0 auto', maxWidth: '700px',
+            position: 'relative'
           }}>
-            <div style={{ fontWeight: 800, color: color, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
-              <ShieldCheck size={18} />
-              BÓVEDA (BM Reciclado → Sin Pauta)
-            </div>
-            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: '1.5' }}>
-              Elige uno de tus BMs Reserva limpios y conviértelo en Bóveda. Aquí centralizas todos los WAs (Chatify) y Píxeles (Shopyeasy).
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
-              <div style={{ background: 'var(--bg-primary)', padding: '10px', borderRadius: '6px', borderLeft: '3px solid #25d366' }}>
-                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#25d366', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                  <Smartphone size={14} /> Para Chatify ({allProfileWAs.length} WAs)
-                </div>
-                {allProfileWAs.map(w => (
-                  <div key={w.id} style={{ fontSize: '12px', color: 'var(--text-primary)', padding: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    • {w.name || w.phone}
-                  </div>
-                ))}
-                {allProfileWAs.length === 0 && <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Sin WAs</div>}
-              </div>
-
-              <div style={{ background: 'var(--bg-primary)', padding: '10px', borderRadius: '6px', borderLeft: '3px solid #f59e0b' }}>
-                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
-                  <Box size={14} /> Para Shopyeasy ({allProfilePxs.length} Pxs)
-                </div>
-                {allProfilePxs.map(p => (
-                  <div key={p.id} style={{ fontSize: '12px', color: 'var(--text-primary)', padding: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                    • {p.name}
-                  </div>
-                ))}
-                {allProfilePxs.length === 0 && <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Sin Píxeles</div>}
-              </div>
+            <div style={{ 
+              position: 'absolute', top: '-12px', left: '20px', 
+              background: color, color: '#fff', fontSize: '12px', fontWeight: 800, 
+              padding: '4px 14px', borderRadius: '20px',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
+              <ShieldCheck size={14} /> BÓVEDA (BM Reciclado — Sin Pauta)
             </div>
 
-            {/* Vault Arrow */}
-            <div style={{ textAlign: 'center', color: color, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
-              <Share2 size={12} /> Comparte Píxel como Socio a los Guerreros ↓
+            <div style={{ marginTop: '10px', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+              Elige un BM Reserva limpio → cámbiale el nombre → centraliza aquí todos tus activos. Aquí conectas <strong style={{ color: '#25d366' }}>Chatify</strong> y <strong style={{ color: '#f59e0b' }}>Shopyeasy</strong>.
+            </div>
+
+            {/* Assets Row */}
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+              <AssetCluster items={allWAs.map(w => w.name || w.phone)} icon={Smartphone} color="#25d366" label="WhatsApps (Chatify)" />
+              <AssetCluster items={allPxs.map(p => p.name)} icon={Code} color="#f59e0b" label="Píxeles (Shopyeasy)" />
+              <AssetCluster items={allPages.map(p => p.name)} icon={Globe} color="#3b82f6" label="Fan Pages" />
             </div>
           </div>
-        )}
 
-        {/* GUERREROS */}
-        {warriors.length > 0 && (
-          <div>
-            <div style={{ fontWeight: 800, color: '#06b6d4', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
-              <ShieldAlert size={16} /> GUERREROS — Pauta Activa ({warriors.length})
-            </div>
-            {warriors.map(bm => (
-              <BMCard key={bm.id} bm={bm} ads={ads} was={was} pxs={pxs} pages={pages} zoneColor="#06b6d4" />
-            ))}
-          </div>
-        )}
+          <Arrow color="#06b6d4" label="⚡ Comparte Píxel como SOCIO →" />
+        </>
+      ) : (
+        /* Rented profile: no vault, just show assets in the BMs directly */
+        <div style={{ textAlign: 'center', padding: '10px', fontSize: '13px', color: '#f43f5e', fontWeight: 700 }}>
+          ⚠️ Perfil Alquilado — No se puede crear Bóveda. Solo pautar con lo que hay.
+        </div>
+      )}
 
-        {/* RESERVAS */}
-        {reserves.length > 0 && (
-          <div>
-            <div style={{ fontWeight: 800, color: '#8b5cf6', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
-              <Package size={16} /> RESERVAS — Listos para Activar ({reserves.length})
-            </div>
-            {reserves.map(bm => (
-              <BMCard key={bm.id} bm={bm} ads={ads} was={was} pxs={pxs} pages={pages} zoneColor="#8b5cf6" />
-            ))}
+      {/* ═══ LAYER 2: GUERREROS ═══ */}
+      {warriors.length > 0 && (
+        <div style={{ 
+          background: '#06b6d408', border: '2px solid #06b6d425', borderRadius: '16px', 
+          padding: '20px', margin: '0 auto', maxWidth: '700px',
+          position: 'relative'
+        }}>
+          <div style={{ 
+            position: 'absolute', top: '-12px', left: '20px', 
+            background: '#06b6d4', color: '#fff', fontSize: '12px', fontWeight: 800, 
+            padding: '4px 14px', borderRadius: '20px',
+            display: 'flex', alignItems: 'center', gap: '6px'
+          }}>
+            <Megaphone size={14} /> GUERREROS — Pauta Activa ({warriors.length})
           </div>
-        )}
 
-        {/* CEMENTERIO */}
-        {cemetery.length > 0 && (
-          <div>
-            <div style={{ fontWeight: 800, color: '#ef4444', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
-              <Skull size={16} /> CEMENTERIO — No Tocar ({cemetery.length})
-            </div>
-            {cemetery.map(bm => (
-              <BMCard key={bm.id} bm={bm} ads={ads} was={was} pxs={pxs} pages={pages} zoneColor="#ef4444" />
-            ))}
+          <div style={{ marginTop: '10px', display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {warriors.map(bm => {
+              const bmAds = ads.filter(a => a.bm_id === bm.id);
+              const debt = bmAds.reduce((s, a) => s + (a.current_balance || 0), 0);
+              const bmWAs = was.filter(w => w.bm_id === bm.id);
+              const bmPxs = pxs.filter(p => p.bm_id === bm.id);
+              return (
+                <DiagramNode 
+                  key={bm.id} icon={Briefcase} label={bm.name} 
+                  sublabel={`${bmAds.length} ctas | ${bmWAs.length} WA | ${bmPxs.length} Px`}
+                  color={debt > 1000000 ? '#ef4444' : '#06b6d4'} size="sm"
+                  badge={debt > 0 ? { text: `$${(debt/1000000).toFixed(1)}M`, color: '#ef4444' } : null}
+                />
+              );
+            })}
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* ═══ LAYER 3: RESERVAS ═══ */}
+      {reserves.length > 0 && (
+        <>
+          <Arrow color="#8b5cf6" label="Activar cuando caiga un Guerrero" dashed={true} />
+          <div style={{ 
+            background: '#8b5cf608', border: '2px dashed #8b5cf625', borderRadius: '16px', 
+            padding: '20px', margin: '0 auto', maxWidth: '700px',
+            position: 'relative'
+          }}>
+            <div style={{ 
+              position: 'absolute', top: '-12px', left: '20px', 
+              background: '#8b5cf6', color: '#fff', fontSize: '12px', fontWeight: 800, 
+              padding: '4px 14px', borderRadius: '20px',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
+              <Package size={14} /> RESERVAS — En Banca ({reserves.length})
+            </div>
+
+            <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {reserves.map(bm => {
+                const bmPages = pages.filter(p => p.bm_id === bm.id);
+                const bmWAs = was.filter(w => w.bm_id === bm.id);
+                return (
+                  <DiagramNode 
+                    key={bm.id} icon={Package} label={bm.name} 
+                    sublabel={`${bmPages.length} pág | ${bmWAs.length} WA`}
+                    color="#8b5cf6" size="sm"
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* ═══ LAYER 4: CEMENTERIO ═══ */}
+      {cemetery.length > 0 && (
+        <>
+          <div style={{ display: 'flex', justifyContent: 'center', padding: '12px 0' }}>
+            <div style={{ 
+              background: 'repeating-linear-gradient(45deg, #ef444410, #ef444410 10px, transparent 10px, transparent 20px)',
+              height: '3px', width: '200px'
+            }} />
+          </div>
+          <div style={{ 
+            background: '#ef444408', border: '2px solid #ef444425', borderRadius: '16px', 
+            padding: '20px', margin: '0 auto', maxWidth: '700px',
+            position: 'relative',
+            backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(239,68,68,0.03) 35px, rgba(239,68,68,0.03) 70px)'
+          }}>
+            <div style={{ 
+              position: 'absolute', top: '-12px', left: '20px', 
+              background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 800, 
+              padding: '4px 14px', borderRadius: '20px',
+              display: 'flex', alignItems: 'center', gap: '6px'
+            }}>
+              <Skull size={14} /> CEMENTERIO — NO TOCAR ({cemetery.length})
+            </div>
+
+            <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              {cemetery.map(bm => {
+                const debt = ads.filter(a => a.bm_id === bm.id).reduce((s, a) => s + (a.current_balance || 0), 0);
+                return (
+                  <DiagramNode 
+                    key={bm.id} icon={Skull} label={bm.name} 
+                    sublabel={`Deuda: $${(debt/1000000).toFixed(1)}M`}
+                    color="#ef4444" size="sm"
+                  />
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 };
 
 /* ──────────────────────────────────────────────
-   Sub-component: Scalability Template
-   ────────────────────────────────────────────── */
-const ScalabilityTemplate = () => (
-  <div style={{
-    background: 'var(--bg-primary)',
-    borderRadius: '16px',
-    border: '2px dashed #f59e0b40',
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column'
-  }}>
-    <div style={{ background: 'linear-gradient(135deg, #f59e0b20, #f59e0b05)', padding: '14px 18px', borderBottom: '1px dashed #f59e0b30' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-        <Plus size={18} color="#f59e0b" />
-        <h3 style={{ margin: 0, color: '#f59e0b', fontSize: '16px', fontWeight: 800 }}>PLANTILLA: Nuevo Perfil</h3>
-      </div>
-      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-        Replica este modelo para cada perfil antidetect nuevo que compres.
-      </div>
-    </div>
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div style={{ background: 'var(--bg-secondary)', border: '2px dashed #f59e0b', borderRadius: '10px', padding: '14px' }}>
-        <div style={{ fontWeight: 800, color: '#f59e0b', marginBottom: '8px', fontSize: '13px' }}>🛡️ BÓVEDA-[NOMBRE]</div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          <div style={{ background: 'var(--bg-primary)', padding: '8px', borderRadius: '6px', borderLeft: '3px solid #25d366', fontSize: '11px' }}>
-            <strong style={{ color: '#25d366' }}>Chatify:</strong> <span style={{ color: 'var(--text-secondary)' }}>Nuevo WA</span>
-          </div>
-          <div style={{ background: 'var(--bg-primary)', padding: '8px', borderRadius: '6px', borderLeft: '3px solid #f59e0b', fontSize: '11px' }}>
-            <strong style={{ color: '#f59e0b' }}>Shopyeasy:</strong> <span style={{ color: 'var(--text-secondary)' }}>Nuevo Pixel</span>
-          </div>
-        </div>
-        <div style={{ textAlign: 'center', color: '#f59e0b', fontSize: '10px', fontWeight: 700, marginTop: '8px' }}>
-          <Share2 size={10} style={{ display: 'inline', marginRight: '4px' }} /> Comparte Píxel ↓
-        </div>
-      </div>
-      <div style={{ background: 'var(--bg-secondary)', border: '1px solid #06b6d420', borderRadius: '8px', padding: '10px' }}>
-        <div style={{ fontWeight: 700, color: '#06b6d4', fontSize: '12px', marginBottom: '6px' }}>⚔️ GUERREROS</div>
-        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>BM Guerrero 1 (Recibe Pixel + Tarjeta)</div>
-        <div style={{ fontSize: '11px', color: 'var(--text-secondary)' }}>BM Guerrero 2 (Recibe Pixel + Tarjeta)</div>
-      </div>
-    </div>
-  </div>
-);
-
-/* ──────────────────────────────────────────────
    MAIN COMPONENT
    ────────────────────────────────────────────── */
 const IdealArchitecture = ({ bms, ads, was, pxs, pages }) => {
-  // Global stats
-  const totalWAs = was.length;
-  const totalPxs = pxs.length;
-  const totalPages = pages.length;
-  const totalDebt = ads.reduce((s, a) => s + (a.current_balance || 0), 0);
+  const profiles = [
+    { name: 'Paula Rojas', color: '#a855f7', rented: false, morelogin: false },
+    { name: 'Luz Angela', color: '#10b981', rented: false, morelogin: false },
+    { name: 'Nelson Lopez', color: '#3b82f6', rented: false, morelogin: true },
+    { name: 'Gabriela Teguchi', color: '#f43f5e', rented: true, morelogin: false },
+  ];
+  const [selectedProfile, setSelectedProfile] = useState(0);
+  const current = profiles[selectedProfile];
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', animation: 'fadeIn 0.5s ease-out' }}>
-      {/* Header Banner */}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '0', animation: 'fadeIn 0.5s ease-out' }}>
+      
+      {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.1) 0%, rgba(6, 182, 212, 0.05) 100%)',
-        border: '1px solid rgba(168, 85, 247, 0.3)',
-        borderLeft: '4px solid #a855f7',
-        padding: '20px',
-        borderRadius: '12px',
+        background: 'linear-gradient(135deg, rgba(168,85,247,0.1), rgba(6,182,212,0.05))',
+        border: '1px solid rgba(168,85,247,0.3)', borderLeft: '4px solid #a855f7',
+        padding: '16px 20px', borderRadius: '12px', marginBottom: '16px'
       }}>
-        <h3 style={{ color: '#a855f7', marginTop: 0, display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
-          <Network size={22} /> Arquitectura de Bóvedas Descentralizadas
+        <h3 style={{ color: '#a855f7', margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '18px' }}>
+          <Network size={22} /> Diagrama de Contingencia — Bóvedas Descentralizadas
         </h3>
-        <p style={{ margin: '0 0 12px 0', color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.6' }}>
-          Cada perfil tiene su propia <strong>Bóveda</strong> (un BM reciclado sin pauta) que protege tus WAs y Píxeles para Chatify/Shopyeasy.
-          Los <strong>Guerreros</strong> reciben el Pixel compartido y pautar con tarjeta. Si caen, la Bóveda está intacta.
+        <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '13px', lineHeight: '1.5' }}>
+          Selecciona un perfil para ver su diagrama completo de contingencia: Perfil → Bóveda → Guerreros → Reservas → Cementerio.
         </p>
-        <div style={{ display: 'flex', gap: '20px', fontSize: '12px', flexWrap: 'wrap' }}>
-          <span style={{ color: 'var(--text-primary)', fontWeight: 700 }}>{bms.length} BMs totales</span>
-          <span style={{ color: '#25d366', fontWeight: 700 }}>{totalWAs} WhatsApps</span>
-          <span style={{ color: '#f59e0b', fontWeight: 700 }}>{totalPxs} Píxeles</span>
-          <span style={{ color: '#3b82f6', fontWeight: 700 }}>{totalPages} Páginas</span>
-          <span style={{ color: '#ef4444', fontWeight: 700 }}>Deuda total: ${(totalDebt / 1000000).toFixed(1)}M COP</span>
-        </div>
       </div>
 
-      {/* Instruction */}
-      <div style={{
-        background: '#f59e0b10', border: '1px solid #f59e0b30', borderRadius: '8px', padding: '12px 16px',
-        fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '8px'
-      }}>
-        <AlertTriangle size={16} color="#f59e0b" />
-        <span>Haz clic en cualquier BM para ver todos sus activos internos (WhatsApps, Píxeles, Páginas, Cuentas Publicitarias).</span>
-      </div>
-
-      {/* Horizontal scroll of Profiles */}
+      {/* Profile Selector Tabs */}
       <div style={{ 
-        display: 'flex', 
-        gap: '24px', 
-        overflowX: 'auto', 
-        paddingBottom: '16px',
-        scrollSnapType: 'x mandatory',
-        WebkitOverflowScrolling: 'touch'
+        display: 'flex', gap: '8px', marginBottom: '0', 
+        background: 'var(--bg-secondary)', padding: '8px', borderRadius: '12px 12px 0 0',
+        border: '1px solid var(--border-color)', borderBottom: 'none'
       }}>
-        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
-          <ProfileNode profile="Paula Rojas" color="#a855f7" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
-        </div>
-        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
-          <ProfileNode profile="Luz Angela" color="#10b981" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
-        </div>
-        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
-          <ProfileNode profile="Nelson Lopez" color="#3b82f6" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={true} />
-        </div>
-        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
-          <ProfileNode profile="Gabriela Teguchi" color="#f43f5e" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={true} isMoreLogin={false} />
-        </div>
-        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
-          <ScalabilityTemplate />
-        </div>
+        {profiles.map((p, i) => {
+          const profileBMs = bms.filter(b => b.facebook_profile === p.name);
+          const profileWAs = was.filter(w => profileBMs.some(b => b.id === w.bm_id));
+          return (
+            <button key={p.name} onClick={() => setSelectedProfile(i)} style={{
+              flex: 1,
+              background: selectedProfile === i ? `${p.color}15` : 'transparent',
+              border: selectedProfile === i ? `2px solid ${p.color}` : '2px solid transparent',
+              borderRadius: '8px',
+              padding: '10px 14px',
+              cursor: 'pointer',
+              transition: 'all 0.2s',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px'
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <User size={16} color={selectedProfile === i ? p.color : 'var(--text-tertiary)'} />
+                <span style={{ fontWeight: 700, fontSize: '14px', color: selectedProfile === i ? p.color : 'var(--text-secondary)' }}>{p.name}</span>
+                {p.rented && <span style={{ background: '#f43f5e20', color: '#f43f5e', fontSize: '9px', fontWeight: 800, padding: '1px 5px', borderRadius: '4px' }}>ALQUILADA</span>}
+                {p.morelogin && <span style={{ background: '#3b82f620', color: '#3b82f6', fontSize: '9px', fontWeight: 800, padding: '1px 5px', borderRadius: '4px' }}>MORELOGIN</span>}
+              </div>
+              <div style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>
+                {profileBMs.length} BMs · {profileWAs.length} WAs
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Diagram Area */}
+      <div style={{ 
+        background: 'var(--bg-secondary)', 
+        border: '1px solid var(--border-color)', 
+        borderRadius: '0 0 12px 12px',
+        backgroundImage: 'radial-gradient(circle, var(--border-color) 1px, transparent 1px)',
+        backgroundSize: '20px 20px',
+        minHeight: '500px'
+      }}>
+        <ProfileDiagram 
+          profile={current.name} color={current.color}
+          bms={bms} ads={ads} was={was} pxs={pxs} pages={pages}
+          isRented={current.rented} isMoreLogin={current.morelogin}
+        />
       </div>
     </div>
   );
