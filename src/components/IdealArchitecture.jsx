@@ -2,7 +2,7 @@ import React from 'react';
 import { ShieldCheck, ShieldAlert, Package, Skull, ArrowRight, Smartphone, Box } from 'lucide-react';
 
 const IdealArchitecture = ({ bms, ads, was, pxs }) => {
-  const profiles = ['Paula Rojas', 'Luz Angela', 'Gabriela Teguchi'];
+  const profiles = ['Paula Rojas', 'Luz Angela', 'Gabriela Teguchi', 'Nelson Lopez'];
 
   // Función para clasificar los BMs actuales según la lógica ideal
   const classifyBM = (bm) => {

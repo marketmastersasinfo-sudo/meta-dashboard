@@ -56,7 +56,7 @@ const ContingencyVisualizer = () => {
     return 'BLUE';
   };
 
-  const profiles = ['Paula Rojas', 'Luz Angela', 'Gabriela Teguchi'];
+  const profiles = ['Paula Rojas', 'Luz Angela', 'Gabriela Teguchi', 'Nelson Lopez'];
 
   const getZoneColor = (zone) => {
     switch(zone) {
