@@ -24,7 +24,7 @@ const ZONE_COLORS = {
 
 const CorrelationGraph = () => {
   const fgRef = useRef(null);
-  const containerRef = useRef(null);
+  const graphWrapperRef = useRef(null);
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [dimensions, setDimensions] = useState({ width: 1200, height: 750 });
@@ -37,23 +37,32 @@ const CorrelationGraph = () => {
 
   // Responsive sizing
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!graphWrapperRef.current) return;
     
-    const resizeObserver = new ResizeObserver(entries => {
-      for (let entry of entries) {
-        const { width } = entry.contentRect;
-        if (width > 0) {
-          setDimensions({
-            width: width,
-            height: Math.max(window.innerHeight - 200, 650)
-          });
+    const updateSize = () => {
+      if (graphWrapperRef.current) {
+        const { clientWidth, clientHeight } = graphWrapperRef.current;
+        if (clientWidth > 0 && clientHeight > 0) {
+          setDimensions({ width: clientWidth, height: clientHeight });
         }
       }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      // Usamos requestAnimationFrame para evitar el error "ResizeObserver loop limit exceeded"
+      window.requestAnimationFrame(() => updateSize());
     });
 
-    resizeObserver.observe(containerRef.current);
+    resizeObserver.observe(graphWrapperRef.current);
+    window.addEventListener('resize', updateSize);
+    
+    // Llamada inicial con un pequeño retraso para asegurar que el DOM (y flexbox) se ha pintado
+    setTimeout(updateSize, 100);
 
-    return () => resizeObserver.disconnect();
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener('resize', updateSize);
+    };
   }, []);
 
   useEffect(() => { fetchData(); }, []);
@@ -324,7 +333,7 @@ const CorrelationGraph = () => {
   const filtered = getFilteredData();
 
   return (
-    <div ref={containerRef} style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0' }}>
+    <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: '0' }}>
       
       {/* Stats Bar */}
       <div style={{
@@ -356,8 +365,11 @@ const CorrelationGraph = () => {
       </div>
 
       {/* Graph Canvas */}
-      <div style={{
+      <div ref={graphWrapperRef} style={{
         position: 'relative',
+        width: '100%',
+        height: 'calc(100vh - 200px)',
+        minHeight: '650px',
         background: 'radial-gradient(ellipse at center, #0f0f23 0%, #030308 100%)',
         borderRadius: '0 0 12px 12px',
         border: '1px solid rgba(168,85,247,0.2)',
