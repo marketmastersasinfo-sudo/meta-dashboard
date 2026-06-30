@@ -21,9 +21,9 @@ const classifyBM = (bm, ads) => {
    ────────────────────────────────────────────── */
 const DiagramNode = ({ icon: Icon, label, sublabel, color, bg, size = 'md', badge, onClick, glow }) => {
   const sizes = {
-    lg: { w: 180, h: 70, iconSize: 28, fontSize: '15px', subSize: '11px', radius: '14px', pad: '14px 18px' },
-    md: { w: 150, h: 56, iconSize: 20, fontSize: '13px', subSize: '10px', radius: '10px', pad: '10px 14px' },
-    sm: { w: 130, h: 46, iconSize: 16, fontSize: '11px', subSize: '9px', radius: '8px', pad: '8px 10px' },
+    lg: { w: 240, h: 80, iconSize: 34, fontSize: '20px', subSize: '14px', radius: '16px', pad: '18px 24px' },
+    md: { w: 190, h: 64, iconSize: 24, fontSize: '16px', subSize: '12px', radius: '12px', pad: '14px 18px' },
+    sm: { w: 170, h: 56, iconSize: 20, fontSize: '14px', subSize: '11px', radius: '10px', pad: '12px 14px' },
   };
   const s = sizes[size];
   return (
@@ -34,13 +34,13 @@ const DiagramNode = ({ icon: Icon, label, sublabel, color, bg, size = 'md', badg
       padding: s.pad,
       display: 'flex',
       alignItems: 'center',
-      gap: '10px',
+      gap: '12px',
       cursor: onClick ? 'pointer' : 'default',
       transition: 'all 0.3s',
       position: 'relative',
-      boxShadow: glow ? `0 0 20px ${color}40, 0 4px 12px rgba(0,0,0,0.1)` : '0 2px 8px rgba(0,0,0,0.05)',
+      boxShadow: glow ? `0 0 24px ${color}40, 0 6px 16px rgba(0,0,0,0.1)` : '0 2px 8px rgba(0,0,0,0.05)',
       minWidth: s.w + 'px',
-      maxWidth: '220px',
+      maxWidth: '280px',
     }}>
       <div style={{ 
         width: s.iconSize + 12 + 'px', height: s.iconSize + 12 + 'px', 
@@ -54,7 +54,7 @@ const DiagramNode = ({ icon: Icon, label, sublabel, color, bg, size = 'md', badg
         {sublabel && <div style={{ fontSize: s.subSize, color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{sublabel}</div>}
       </div>
       {badge && (
-        <div style={{ position: 'absolute', top: '-8px', right: '-8px', background: badge.color, color: '#fff', fontSize: '9px', fontWeight: 800, padding: '2px 6px', borderRadius: '10px', whiteSpace: 'nowrap' }}>
+        <div style={{ position: 'absolute', top: '-10px', right: '-10px', background: badge.color, color: '#fff', fontSize: '11px', fontWeight: 800, padding: '3px 10px', borderRadius: '12px', whiteSpace: 'nowrap' }}>
           {badge.text}
         </div>
       )}
@@ -66,10 +66,10 @@ const DiagramNode = ({ icon: Icon, label, sublabel, color, bg, size = 'md', badg
    Arrow / Connector 
    ────────────────────────────────────────────── */
 const Arrow = ({ color = '#6b7280', label, dashed }) => (
-  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px', padding: '4px 0' }}>
-    <div style={{ width: '2px', height: '20px', background: color, borderStyle: dashed ? 'dashed' : 'solid' }} />
-    {label && <div style={{ fontSize: '10px', color, fontWeight: 700, padding: '2px 8px', background: `${color}10`, borderRadius: '4px', whiteSpace: 'nowrap' }}>{label}</div>}
-    <div style={{ width: 0, height: 0, borderLeft: '6px solid transparent', borderRight: '6px solid transparent', borderTop: `8px solid ${color}` }} />
+  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', padding: '8px 0' }}>
+    <div style={{ width: '3px', height: '28px', background: color, borderStyle: dashed ? 'dashed' : 'solid' }} />
+    {label && <div style={{ fontSize: '13px', color, fontWeight: 700, padding: '4px 14px', background: `${color}10`, borderRadius: '6px', whiteSpace: 'nowrap' }}>{label}</div>}
+    <div style={{ width: 0, height: 0, borderLeft: '8px solid transparent', borderRight: '8px solid transparent', borderTop: `10px solid ${color}` }} />
   </div>
 );
 
@@ -88,19 +88,19 @@ const HorizontalArrow = ({ color = '#6b7280', label, direction = 'right' }) => (
    ────────────────────────────────────────────── */
 const AssetCluster = ({ items, icon: Icon, color, label }) => (
   <div style={{ 
-    background: `${color}08`, border: `1px solid ${color}25`, borderRadius: '10px', 
-    padding: '10px', minWidth: '140px', maxWidth: '200px' 
+    background: `${color}08`, border: `1px solid ${color}25`, borderRadius: '12px', 
+    padding: '14px', minWidth: '180px', maxWidth: '260px', flex: '1 1 180px'
   }}>
-    <div style={{ fontSize: '11px', fontWeight: 800, color, marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-      <Icon size={14} /> {label} ({items.length})
+    <div style={{ fontSize: '14px', fontWeight: 800, color, marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <Icon size={18} /> {label} ({items.length})
     </div>
-    {items.slice(0, 5).map((item, i) => (
-      <div key={i} style={{ fontSize: '11px', color: 'var(--text-primary)', padding: '2px 0', display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <div style={{ width: '4px', height: '4px', borderRadius: '50%', background: color, flexShrink: 0 }} />
+    {items.slice(0, 6).map((item, i) => (
+      <div key={i} style={{ fontSize: '13px', color: 'var(--text-primary)', padding: '3px 0', display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ width: '5px', height: '5px', borderRadius: '50%', background: color, flexShrink: 0 }} />
         <span style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{item}</span>
       </div>
     ))}
-    {items.length > 5 && <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>+{items.length - 5} más...</div>}
+    {items.length > 6 && <div style={{ fontSize: '12px', color: 'var(--text-tertiary)', marginTop: '4px' }}>+{items.length - 6} más...</div>}
   </div>
 );
 
@@ -152,18 +152,18 @@ const ProfileDiagram = ({ profile, color, bms, ads, was, pxs, pages, isRented, i
             <div style={{ 
               position: 'absolute', top: '-12px', left: '20px', 
               background: color, color: '#fff', fontSize: '12px', fontWeight: 800, 
-              padding: '4px 14px', borderRadius: '20px',
-              display: 'flex', alignItems: 'center', gap: '6px'
-            }}>
-              <ShieldCheck size={14} /> BÓVEDA (BM Reciclado — Sin Pauta)
+              padding: '6px 18px', borderRadius: '24px',
+              display: 'flex', alignItems: 'center', gap: '8px'
+          }}>
+            <ShieldCheck size={18} /> BÓVEDA (BM Reciclado — Sin Pauta)
             </div>
 
-            <div style={{ marginTop: '10px', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+            <div style={{ marginTop: '14px', fontSize: '15px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
               Elige un BM Reserva limpio → cámbiale el nombre → centraliza aquí todos tus activos. Aquí conectas <strong style={{ color: '#25d366' }}>Chatify</strong> y <strong style={{ color: '#f59e0b' }}>Shopyeasy</strong>.
             </div>
 
             {/* Assets Row */}
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
               <AssetCluster items={allWAs.map(w => w.name || w.phone)} icon={Smartphone} color="#25d366" label="WhatsApps (Chatify)" />
               <AssetCluster items={allPxs.map(p => p.name)} icon={Code} color="#f59e0b" label="Píxeles (Shopyeasy)" />
               <AssetCluster items={allPages.map(p => p.name)} icon={Globe} color="#3b82f6" label="Fan Pages" />
@@ -189,7 +189,7 @@ const ProfileDiagram = ({ profile, color, bms, ads, was, pxs, pages, isRented, i
           <div style={{ 
             position: 'absolute', top: '-12px', left: '20px', 
             background: '#06b6d4', color: '#fff', fontSize: '12px', fontWeight: 800, 
-            padding: '4px 14px', borderRadius: '20px',
+            padding: '6px 18px', borderRadius: '24px',
             display: 'flex', alignItems: 'center', gap: '6px'
           }}>
             <Megaphone size={14} /> GUERREROS — Pauta Activa ({warriors.length})
@@ -226,7 +226,7 @@ const ProfileDiagram = ({ profile, color, bms, ads, was, pxs, pages, isRented, i
             <div style={{ 
               position: 'absolute', top: '-12px', left: '20px', 
               background: '#8b5cf6', color: '#fff', fontSize: '12px', fontWeight: 800, 
-              padding: '4px 14px', borderRadius: '20px',
+              padding: '6px 18px', borderRadius: '24px',
               display: 'flex', alignItems: 'center', gap: '6px'
             }}>
               <Package size={14} /> RESERVAS — En Banca ({reserves.length})
@@ -267,7 +267,7 @@ const ProfileDiagram = ({ profile, color, bms, ads, was, pxs, pages, isRented, i
             <div style={{ 
               position: 'absolute', top: '-12px', left: '20px', 
               background: '#ef4444', color: '#fff', fontSize: '12px', fontWeight: 800, 
-              padding: '4px 14px', borderRadius: '20px',
+              padding: '6px 18px', borderRadius: '24px',
               display: 'flex', alignItems: 'center', gap: '6px'
             }}>
               <Skull size={14} /> CEMENTERIO — NO TOCAR ({cemetery.length})
