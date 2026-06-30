@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShieldCheck, ShieldAlert, Package, Skull, ArrowRight, Smartphone, Box, Shield, Plus, Share2, Server } from 'lucide-react';
+import { ShieldCheck, ShieldAlert, Package, Skull, ArrowRight, Smartphone, Box, Shield, Plus, Share2, Server, Network } from 'lucide-react';
 
 const FederatedVaultNode = ({ profile, title, color, isTemplate, bms = [], ads = [], was = [], pxs = [] }) => {
   // Extract data for actual profiles
