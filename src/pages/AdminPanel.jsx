@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { Database, Plus, RefreshCw, Layers, Edit, Trash2, Cpu } from 'lucide-react';
+import { Database, Plus, RefreshCw, Layers, Edit, Trash2, Cpu, Loader2 } from 'lucide-react';
 import AdminBMEditor from '../components/AdminBMEditor';
 import AIPDFImporter from '../components/AIPDFImporter';
 

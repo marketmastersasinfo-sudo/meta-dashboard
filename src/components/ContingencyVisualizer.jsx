@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { ShieldAlert, ShieldCheck, Shield, AlertTriangle, AlertCircle, Smartphone, CreditCard, Box, Share2, Eye } from 'lucide-react';
+import { ShieldAlert, ShieldCheck, Shield, AlertTriangle, AlertCircle, Smartphone, CreditCard, Box, Share2, Eye, Loader2 } from 'lucide-react';
 
 const ContingencyVisualizer = () => {
   const [data, setData] = useState({ bms: [], ads: [], pages: [], was: [], pxs: [] });
