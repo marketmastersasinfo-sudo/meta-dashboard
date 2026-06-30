@@ -125,7 +125,7 @@ const ContingencyVisualizer = () => {
       </div>
 
       {filter === 'IDEAL' ? (
-        <IdealArchitecture bms={data.bms} ads={data.ads} pxs={data.pxs} was={data.was} />
+        <IdealArchitecture bms={data.bms} ads={data.ads} pxs={data.pxs} was={data.was} pages={data.pages} />
       ) : (
         <>
           {profiles.map(profile => {
