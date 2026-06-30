@@ -35,8 +35,8 @@ const BMCard = ({ bm, ads, was, pxs, pages, zoneColor, zoneIcon, zoneLabel }) =>
       border: `1px solid ${zoneColor}30`,
       borderLeft: `3px solid ${zoneColor}`,
       borderRadius: '8px',
-      marginBottom: '6px',
-      fontSize: '12px',
+      marginBottom: '8px',
+      fontSize: '14px',
       overflow: 'hidden'
     }}>
       <div
@@ -50,11 +50,11 @@ const BMCard = ({ bm, ads, was, pxs, pages, zoneColor, zoneIcon, zoneLabel }) =>
         {expanded ? <ChevronDown size={14} color={zoneColor} /> : <ChevronRight size={14} color={zoneColor} />}
         <span style={{ fontWeight: 700, color: 'var(--text-primary)', flex: 1 }}>{bm.name}</span>
         {debt > 0 && (
-          <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '11px' }}>
+          <span style={{ color: '#ef4444', fontWeight: 700, fontSize: '13px' }}>
             ${(debt / 1000000).toFixed(1)}M
           </span>
         )}
-        <span style={{ color: 'var(--text-tertiary)', fontSize: '10px' }}>
+        <span style={{ color: 'var(--text-tertiary)', fontSize: '12px' }}>
           {totalAssets} activos
         </span>
       </div>
@@ -62,24 +62,24 @@ const BMCard = ({ bm, ads, was, pxs, pages, zoneColor, zoneIcon, zoneLabel }) =>
       {expanded && (
         <div style={{ padding: '4px 12px 10px 32px', display: 'flex', flexDirection: 'column', gap: '3px' }}>
           {bmAds.length > 0 && (
-            <div style={{ color: 'var(--text-secondary)', fontSize: '10px', marginBottom: '2px' }}>
-              <CreditCard size={10} style={{ display: 'inline', marginRight: '4px' }} />
+            <div style={{ color: 'var(--text-secondary)', fontSize: '12px', marginBottom: '4px' }}>
+              <CreditCard size={12} style={{ display: 'inline', marginRight: '4px' }} />
               {bmAds.length} cuentas pub. | {bmAds.filter(a => a.status === 'ACTIVE').length} activas
             </div>
           )}
           {bmWAs.map(w => (
-            <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#25d366' }}>
-              <Smartphone size={11} /> <span style={{ color: 'var(--text-primary)' }}>{w.name || w.phone}</span>
+            <div key={w.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#25d366', padding: '2px 0' }}>
+              <Smartphone size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{w.name || w.phone}</span>
             </div>
           ))}
           {bmPxs.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b' }}>
-              <Box size={11} /> <span style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f59e0b', padding: '2px 0' }}>
+              <Box size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{p.name}</span>
             </div>
           ))}
           {bmPages.map(p => (
-            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#3b82f6' }}>
-              <Globe size={11} /> <span style={{ color: 'var(--text-primary)' }}>{p.name}</span>
+            <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#3b82f6', padding: '2px 0' }}>
+              <Globe size={14} /> <span style={{ color: 'var(--text-primary)', fontSize: '13px' }}>{p.name}</span>
             </div>
           ))}
           {totalAssets === 0 && bmAds.length === 0 && (
@@ -143,7 +143,7 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
           {isRented && <span style={{ background: '#f43f5e20', color: '#f43f5e', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>ALQUILADA</span>}
           {isMoreLogin && <span style={{ background: '#3b82f620', color: '#3b82f6', padding: '2px 8px', borderRadius: '4px', fontSize: '10px', fontWeight: 700 }}>MORELOGIN</span>}
         </div>
-        <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '11px', color: 'var(--text-secondary)' }}>
+        <div style={{ display: 'flex', gap: '16px', marginTop: '8px', fontSize: '13px', color: 'var(--text-secondary)' }}>
           <span>{profileBMs.length} BMs</span>
           <span style={{ color: '#25d366' }}>{allProfileWAs.length} WAs</span>
           <span style={{ color: '#f59e0b' }}>{allProfilePxs.length} Píxeles</span>
@@ -162,42 +162,42 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
             borderRadius: '10px',
             padding: '14px'
           }}>
-            <div style={{ fontWeight: 800, color: color, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
-              <ShieldCheck size={16} />
+            <div style={{ fontWeight: 800, color: color, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
+              <ShieldCheck size={18} />
               BÓVEDA (BM Reciclado → Sin Pauta)
             </div>
-            <div style={{ fontSize: '11px', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: '1.5' }}>
+            <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '10px', lineHeight: '1.5' }}>
               Elige uno de tus BMs Reserva limpios y conviértelo en Bóveda. Aquí centralizas todos los WAs (Chatify) y Píxeles (Shopyeasy).
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '10px' }}>
               <div style={{ background: 'var(--bg-primary)', padding: '10px', borderRadius: '6px', borderLeft: '3px solid #25d366' }}>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#25d366', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
-                  <Smartphone size={12} /> Para Chatify ({allProfileWAs.length} WAs)
+                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#25d366', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <Smartphone size={14} /> Para Chatify ({allProfileWAs.length} WAs)
                 </div>
                 {allProfileWAs.map(w => (
-                  <div key={w.id} style={{ fontSize: '10px', color: 'var(--text-primary)', padding: '1px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div key={w.id} style={{ fontSize: '12px', color: 'var(--text-primary)', padding: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     • {w.name || w.phone}
                   </div>
                 ))}
-                {allProfileWAs.length === 0 && <div style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>Sin WAs</div>}
+                {allProfileWAs.length === 0 && <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Sin WAs</div>}
               </div>
 
               <div style={{ background: 'var(--bg-primary)', padding: '10px', borderRadius: '6px', borderLeft: '3px solid #f59e0b' }}>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '4px', marginBottom: '6px' }}>
-                  <Box size={12} /> Para Shopyeasy ({allProfilePxs.length} Pxs)
+                <div style={{ fontSize: '13px', fontWeight: 'bold', color: '#f59e0b', display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '8px' }}>
+                  <Box size={14} /> Para Shopyeasy ({allProfilePxs.length} Pxs)
                 </div>
                 {allProfilePxs.map(p => (
-                  <div key={p.id} style={{ fontSize: '10px', color: 'var(--text-primary)', padding: '1px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  <div key={p.id} style={{ fontSize: '12px', color: 'var(--text-primary)', padding: '2px 0', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                     • {p.name}
                   </div>
                 ))}
-                {allProfilePxs.length === 0 && <div style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>Sin Píxeles</div>}
+                {allProfilePxs.length === 0 && <div style={{ fontSize: '12px', color: 'var(--text-tertiary)' }}>Sin Píxeles</div>}
               </div>
             </div>
 
             {/* Vault Arrow */}
-            <div style={{ textAlign: 'center', color: color, fontSize: '10px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <div style={{ textAlign: 'center', color: color, fontSize: '13px', fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', marginTop: '8px' }}>
               <Share2 size={12} /> Comparte Píxel como Socio a los Guerreros ↓
             </div>
           </div>
@@ -206,7 +206,7 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
         {/* GUERREROS */}
         {warriors.length > 0 && (
           <div>
-            <div style={{ fontWeight: 800, color: '#06b6d4', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+            <div style={{ fontWeight: 800, color: '#06b6d4', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
               <ShieldAlert size={16} /> GUERREROS — Pauta Activa ({warriors.length})
             </div>
             {warriors.map(bm => (
@@ -218,7 +218,7 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
         {/* RESERVAS */}
         {reserves.length > 0 && (
           <div>
-            <div style={{ fontWeight: 800, color: '#8b5cf6', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+            <div style={{ fontWeight: 800, color: '#8b5cf6', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
               <Package size={16} /> RESERVAS — Listos para Activar ({reserves.length})
             </div>
             {reserves.map(bm => (
@@ -230,7 +230,7 @@ const ProfileNode = ({ profile, color, bms, ads, was, pxs, pages, isRented, isMo
         {/* CEMENTERIO */}
         {cemetery.length > 0 && (
           <div>
-            <div style={{ fontWeight: 800, color: '#ef4444', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px' }}>
+            <div style={{ fontWeight: 800, color: '#ef4444', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '15px' }}>
               <Skull size={16} /> CEMENTERIO — No Tocar ({cemetery.length})
             </div>
             {cemetery.map(bm => (
@@ -333,13 +333,30 @@ const IdealArchitecture = ({ bms, ads, was, pxs, pages }) => {
         <span>Haz clic en cualquier BM para ver todos sus activos internos (WhatsApps, Píxeles, Páginas, Cuentas Publicitarias).</span>
       </div>
 
-      {/* Grid of Profiles */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '20px' }}>
-        <ProfileNode profile="Paula Rojas" color="#a855f7" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
-        <ProfileNode profile="Luz Angela" color="#10b981" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
-        <ProfileNode profile="Nelson Lopez" color="#3b82f6" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={true} />
-        <ProfileNode profile="Gabriela Teguchi" color="#f43f5e" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={true} isMoreLogin={false} />
-        <ScalabilityTemplate />
+      {/* Horizontal scroll of Profiles */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '24px', 
+        overflowX: 'auto', 
+        paddingBottom: '16px',
+        scrollSnapType: 'x mandatory',
+        WebkitOverflowScrolling: 'touch'
+      }}>
+        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
+          <ProfileNode profile="Paula Rojas" color="#a855f7" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
+        </div>
+        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
+          <ProfileNode profile="Luz Angela" color="#10b981" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={false} />
+        </div>
+        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
+          <ProfileNode profile="Nelson Lopez" color="#3b82f6" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={false} isMoreLogin={true} />
+        </div>
+        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
+          <ProfileNode profile="Gabriela Teguchi" color="#f43f5e" bms={bms} ads={ads} was={was} pxs={pxs} pages={pages} isRented={true} isMoreLogin={false} />
+        </div>
+        <div style={{ minWidth: '420px', maxWidth: '500px', flex: '0 0 420px', scrollSnapAlign: 'start' }}>
+          <ScalabilityTemplate />
+        </div>
       </div>
     </div>
   );
